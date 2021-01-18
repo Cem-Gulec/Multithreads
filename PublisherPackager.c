@@ -3,39 +3,67 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
+/*
+    This program aims to create a Publisher & Packager Mechanism with multithreaded programming approaches. 
+    Our mechanism is just an another variant of well-known problem "Producer & Consumer".
 
+    Authors: Tuna Cinsoy & Enver Aslan & Cem Güleç
+*/
+
+// Structure for holding information about publishers
 struct publisher
 {
     int publisherID;
     int *books;
+    int howManyBooksPublisherHasPublished;
 
 } typedef publisher;
 
-struct buffer
+// This struct holds elements of buffers
+struct bufferElement
 {
     int publisherID;
     int bookID;
-} typedef buffer;
+} typedef bufferElement;
 
+// Our publishers are categorized underneath their types. For instance, "Novel" book type will have its own publishers.
 struct publisherType
 {
+    int bufferSize;
     int publisherTypeID;
     publisher *publishers;
-    buffer *buffer;
+    bufferElement *buffer;
 } typedef publisherType;
 
-void initializePublishers(int publisherTypeCount, int publisherCount, int numberOfBooksThatShouldBePublished);
+// Simple structure to hold information about books
+struct book
+{
+    int publisherType;
+    int bookID;
+} typedef book;
+
+//Packager structure, contains necessary attributes for further operations
+struct packager
+{
+    int packagerID;
+    int packageSize;
+    book *books;
+    int howManyBooksArePackaged;
+} typedef packager;
+
+// Function Prototypes
+void initializePublishers(int publisherTypeCount, int publisherCount, int numberOfBooksThatShouldBePublished, int initialBufferSize);
 
 int main(int argc, char *argv[])
 {
-
+    // Checking argument count as part of error checking
     if (argc != 10)
     {
         fprintf(stderr, "Input format: ./publisherPackager -n 2 3 4 -b 5 -s 6 7\n");
     }
     else
     {
-
+        // Retrieving variables from input arguments
         int publisherTypeCount = atoi(argv[2]);
         int publisherThreadCount = atoi(argv[3]);
         int packagerThreadCount = atoi(argv[4]);
@@ -44,7 +72,8 @@ int main(int argc, char *argv[])
         int packageSize = atoi(argv[8]);
         int initialBufferSize = atoi(argv[9]);
 
-        initializePublishers(publisherTypeCount, publisherThreadCount, numberOfBooksThatShouldBePublished);
+        //Sending variables to start the creation of structs
+        initializePublishers(publisherTypeCount, publisherThreadCount, numberOfBooksThatShouldBePublished, initialBufferSize);
 
         // printf("publisherTypeCount: %d\n", publisherTypeCount);
         // printf("publisherThreadCount: %d\n", publisherThreadCount);
@@ -55,36 +84,34 @@ int main(int argc, char *argv[])
     }
 }
 
-void initializePublishers(int publisherTypeCount, int publisherCount, int numberOfBooksThatShouldBePublished)
+void initializePublishers(int publisherTypeCount, int publisherCount, int numberOfBooksThatShouldBePublished, int initialBufferSize)
 {
-
+    // First of all, we are declaring publisherType just as many as publisherTypeCount
     publisherType publisherType[publisherTypeCount];
 
-    // Initialize Publishers and also their types with their books
+    // Initializing the attributes of publisherType structure, and also allocating buffer and publishers array
     for (int i = 0; i < publisherTypeCount; i++)
     {
-        publisherType[i].publishers = malloc(sizeof(publisher) * publisherCount);
         publisherType[i].publisherTypeID = i + 1;
+        publisherType[i].buffer = malloc(sizeof(bufferElement) * initialBufferSize);
+        publisherType[i].bufferSize = initialBufferSize;
+        publisherType[i].publishers = malloc(sizeof(publisher) * publisherCount);
+        // Initializing the attributes of publishers structure, and also allocating books array
         for (int j = 0; j < publisherCount; j++)
         {
             publisherType[i].publishers[j].publisherID = j + 1;
             publisherType[i].publishers[j].books = malloc(sizeof(int) * numberOfBooksThatShouldBePublished);
-            for (int k = 0; k < numberOfBooksThatShouldBePublished; k++)
-            {
-                publisherType[i].publishers[j].books[k] = k + 1;
-            }
+            publisherType[i].publishers[j].howManyBooksPublisherHasPublished = 0;
         }
     }
 
-    // Printing out
+    // Printing out for debugging purposes
     for (int i = 0; i < publisherTypeCount; i++)
     {
         for (int j = 0; j < publisherCount; j++)
         {
-            for (int k = 0; k < numberOfBooksThatShouldBePublished; k++)
-            {
-                printf("publisherType: %d --- publisherID: %d ---- numberOfBooks: %d\n", publisherType[i].publisherTypeID, publisherType[i].publishers[j].publisherID, publisherType[i].publishers[j].books[k]);
-            }
+
+            printf("publisherType: %d --- publisherID: %d ---- howManyBookPublisherHasPublished: %d ---- howManyBooksPublisherHasToPublish: %d\n", publisherType[i].publisherTypeID, publisherType[i].publishers[j].publisherID, publisherType[i].publishers[j].howManyBooksPublisherHasPublished, numberOfBooksThatShouldBePublished);
         }
     }
 }
