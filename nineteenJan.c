@@ -286,7 +286,7 @@ void *publisherBehaviour(void *arg) {
     thread_arguments *thr_arg = (thread_arguments *)arg;
     
     for (int i = 0; i < thr_arg->totalBook; i++) {
-        printf("for Loop: %d\n", i);
+        //printf("for Loop: %d\n", i);
         sem_wait(&(thr_arg->buffer[(thr_arg->publisher->publisherType) - 1].empty));
         pthread_mutex_lock(&(thr_arg->buffer[(thr_arg->publisher->publisherType) - 1].mutex));
         // CRITICAL SECTION BEGIN
@@ -308,12 +308,13 @@ void *packagerBehaviour(void *arg) {
     
     
     for (int i = 0; i < thr_arg_2->totalBook; i++) {
-        printf("for loop: %d\n", i);
+        //printf("for loop: %d\n", i);
         int chosenIndex = rand() % (thr_arg_2->bufferTypeCount);
         sem_wait(&(thr_arg_2->buffer[chosenIndex].full));
         pthread_mutex_lock(&(thr_arg_2->buffer[chosenIndex].mutex));
         // CRITICAL SECTION
         book retrievedBook = retrieveBookFromBuffer(thr_arg_2->buffer,chosenIndex);
+        // TODO: PRINT RETRIEVED BOOK 
         addBookToPackage(thr_arg_2->package, retrievedBook, thr_arg_2->totalBook);
         if (isPackageFull(thr_arg_2->package, thr_arg_2->totalBook)) {
             printPackage(thr_arg_2->package, thr_arg_2->totalBook, thr_arg_2->packager->packagerID);
